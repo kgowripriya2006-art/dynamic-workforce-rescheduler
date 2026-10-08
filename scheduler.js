@@ -421,10 +421,22 @@ function injectDisruption() {
   let description = '';
 
   if (type === 'absence') {
-    // Randomly pick active employees to go absent
+    // Use judge-selected employee or random
     const active = STATE.employees.filter(e => e.active);
-    const count = sev === 'high' ? 3 : sev === 'medium' ? 2 : 1;
-    const affected = shuffleArr([...active]).slice(0, count);
+    const selectedId = document.getElementById('disruptionEmployee').value;
+    let affected = [];
+
+    if (selectedId !== 'random') {
+      const picked = STATE.employees.find(e => e.id === parseInt(selectedId) && e.active);
+      if (picked) {
+        affected = [picked];
+      }
+    }
+    if (!affected.length) {
+      const count = sev === 'high' ? 3 : sev === 'medium' ? 2 : 1;
+      affected = shuffleArr([...active]).slice(0, count);
+    }
+
     affected.forEach(emp => {
       emp.active = false;
       for (let s = 0; s < STATE.numShifts; s++) {
@@ -449,7 +461,12 @@ function injectDisruption() {
   } else if (type === 'skill_loss') {
     const active = STATE.employees.filter(e => e.active && e.skills.length > 1);
     if (active.length > 0) {
-      const emp = active[Math.floor(Math.random() * active.length)];
+      const selectedId = document.getElementById('disruptionEmployee').value;
+      let emp = null;
+      if (selectedId !== 'random') {
+        emp = active.find(e => e.id === parseInt(selectedId));
+      }
+      if (!emp) emp = active[Math.floor(Math.random() * active.length)];
       const removedSkill = emp.skills.splice(Math.floor(Math.random() * emp.skills.length), 1)[0];
       disruption.affected = [emp.name];
       disruption.skill = removedSkill;
@@ -567,6 +584,52 @@ function applyConstraints() {
     addLog('info', `⚙️ Re-optimizing with new constraints...`);
     runScheduler();
   }
+}
+
+/* ════════════════════════════════════════════════════
+   AUTO DEMO — One-click judge walkthrough
+════════════════════════════════════════════════════ */
+function runFullDemo() {
+  addLog('info', '▶️ Auto Demo starting...');
+  // Step 1: generate
+  document.getElementById('numEmployees').value = 12;
+  document.getElementById('numDays').value = 7;
+  document.getElementById('numShifts').value = 3;
+  generateData();
+
+  setTimeout(() => {
+    // Step 2: run scheduler
+    document.getElementById('algorithm').value = 'genetic';
+    runScheduler();
+    addLog('info', '⏳ Disruptions incoming in 1.5s...');
+
+    setTimeout(() => {
+      // Step 3: absence disruption
+      document.getElementById('disruptionType').value = 'absence';
+      document.getElementById('disruptionDay').value = 3;
+      document.getElementById('disruptionSeverity').value = 'medium';
+      document.getElementById('disruptionEmployee').value = 'random';
+      injectDisruption();
+
+      setTimeout(() => {
+        // Step 4: demand surge
+        document.getElementById('disruptionType').value = 'surge';
+        document.getElementById('disruptionDay').value = 5;
+        document.getElementById('disruptionSeverity').value = 'high';
+        injectDisruption();
+
+        setTimeout(() => {
+          // Step 5: repair
+          repairSchedule();
+          addLog('ok', '✅ Auto Demo complete! Check Comparison + Analytics tabs.');
+          // Switch to comparison tab
+          setTimeout(() => {
+            switchTab('comparison', document.querySelectorAll('.tab')[2]);
+          }, 400);
+        }, 600);
+      }, 600);
+    }, 1500);
+  }, 300);
 }
 
 /* ════════════════════════════════════════════════════

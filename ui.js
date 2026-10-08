@@ -282,10 +282,16 @@ function updateMetrics() {
   const m = sched ? calcMetrics(sched) : { coverage: 0, fairness: 0, conflicts: 0, shifts: 0, changeCost: 0 };
 
   document.getElementById('mEmployees').textContent = STATE.employees.length;
-  document.getElementById('mShifts').textContent = m.shifts;
-  document.getElementById('mCoverage').textContent = (m.coverage * 100).toFixed(0) + '%';
-  document.getElementById('mFairness').textContent = m.fairness.toFixed(2);
-  document.getElementById('mConflicts').textContent = detectConflicts(sched || {}).length || 0;
+  document.getElementById('mShifts').textContent    = m.shifts;
+  document.getElementById('mCoverage').textContent  = (m.coverage * 100).toFixed(0) + '%';
+  document.getElementById('mFairness').textContent  = m.fairness.toFixed(2);
+
+  // Safe conflict count — guard against empty schedule object
+  let conflictCount = 0;
+  if (sched && STATE.employees.length) {
+    conflictCount = detectConflicts(sched).length;
+  }
+  document.getElementById('mConflicts').textContent = conflictCount;
 
   // Change cost
   if (STATE.schedule && STATE.revised) {

@@ -29,7 +29,7 @@
     <div class="header-badges">
       <span class="badge badge-anvation">ANVATION 2026</span>
       <span class="badge badge-ml">ML-Powered</span>
-      <span class="badge badge-live">LIVE</span>
+      <span class="badge badge-live">LIVE DEMO</span>
     </div>
   </div>
 </header>
@@ -131,39 +131,60 @@
       </button>
     </div>
 
-    <!-- Disruptions -->
-    <div class="card card-red">
+    <!-- ═══ DISRUPTION SIMULATOR (Judge Panel) ═══ -->
+    <div class="card card-red" id="disruptionSimulatorCard">
       <div class="card-header">
-        <span class="card-icon">🔥</span>
-        <h2>Inject Disruption</h2>
+        <span class="card-icon">🎮</span>
+        <h2>Disruption Simulator</h2>
+        <span class="judge-badge">JUDGE</span>
       </div>
+
+      <!-- Type -->
       <div class="form-row">
-        <label>Type</label>
+        <label>Disruption Type</label>
         <select id="disruptionType">
-          <option value="absence">Employee Absence</option>
-          <option value="surge">Demand Surge</option>
-          <option value="skill_loss">Skill Loss / Injury</option>
-          <option value="equipment">Equipment Failure</option>
+          <option value="absence">👤 Employee Absence</option>
+          <option value="surge">📈 Demand Surge</option>
+          <option value="skill_loss">🩹 Skill Loss / Injury</option>
+          <option value="equipment">🔧 Equipment Failure</option>
         </select>
       </div>
+
+      <!-- Employee selector (shown for absence/skill_loss) -->
+      <div class="form-row" id="empSelectorRow">
+        <label>Select Employee</label>
+        <select id="disruptionEmployee">
+          <option value="random">⚡ Random (Auto)</option>
+        </select>
+      </div>
+
+      <!-- Day -->
       <div class="form-row">
-        <label>Day</label>
+        <label>Affected Day</label>
         <input type="number" id="disruptionDay" value="3" min="1" max="14"/>
       </div>
+
+      <!-- Severity -->
       <div class="form-row">
         <label>Severity</label>
         <select id="disruptionSeverity">
-          <option value="low">Low</option>
-          <option value="medium" selected>Medium</option>
-          <option value="high">High</option>
+          <option value="low">🟡 Low</option>
+          <option value="medium" selected>🟠 Medium</option>
+          <option value="high">🔴 High</option>
         </select>
       </div>
-      <button class="btn btn-red" onclick="injectDisruption()">
-        🔥 Inject Disruption
-      </button>
-      <button class="btn btn-orange" onclick="repairSchedule()">
-        🔧 AI Repair Schedule
-      </button>
+
+      <div class="simulator-actions">
+        <button class="btn btn-red" onclick="injectDisruption()">
+          🔥 Inject Disruption
+        </button>
+        <button class="btn btn-orange" onclick="repairSchedule()">
+          🔧 AI Repair Schedule
+        </button>
+        <button class="btn btn-demo" onclick="runFullDemo()">
+          ▶️ Auto Demo (Judge)
+        </button>
+      </div>
     </div>
 
     <!-- Live Constraint Editor -->
@@ -205,6 +226,7 @@
       <button class="tab" onclick="switchTab('revised', this)">🔄 Revised Schedule</button>
       <button class="tab" onclick="switchTab('comparison', this)">📊 Comparison</button>
       <button class="tab" onclick="switchTab('analytics', this)">📈 Analytics</button>
+      <button class="tab" onclick="switchTab('howit', this)">🧠 How It Works</button>
     </div>
 
     <!-- Initial Schedule -->
@@ -212,17 +234,17 @@
       <div class="schedule-header">
         <h3>📋 Initial AI-Generated Schedule</h3>
         <div class="legend">
-          <span class="leg leg-morning">Morning</span>
-          <span class="leg leg-afternoon">Afternoon</span>
-          <span class="leg leg-night">Night</span>
+          <span class="leg leg-morning">🌅 Morning</span>
+          <span class="leg leg-afternoon">☀️ Afternoon</span>
+          <span class="leg leg-night">🌙 Night</span>
           <span class="leg leg-off">Off</span>
-          <span class="leg leg-conflict">Conflict</span>
+          <span class="leg leg-conflict">⚠️ Conflict</span>
         </div>
       </div>
       <div class="schedule-wrap" id="initialScheduleWrap">
         <div class="empty-state">
           <div class="empty-icon">🤖</div>
-          <p>Generate data and run the AI Scheduler to see your schedule.</p>
+          <p>Click <strong>"▶️ Auto Demo"</strong> in the left panel for an instant demo,<br/>or generate data and run the AI Scheduler manually.</p>
         </div>
       </div>
     </div>
@@ -245,7 +267,14 @@
 
     <!-- Comparison -->
     <div class="tab-content" id="tab-comparison">
-      <h3>📊 Schedule Comparison — Changes Highlighted</h3>
+      <div class="comparison-header-row">
+        <h3>📊 Schedule Comparison — Before vs After</h3>
+        <div class="comparison-legend">
+          <span class="cmp-leg cmp-leg-changed">🔄 Changed cell</span>
+          <span class="cmp-leg cmp-leg-removed">❌ Removed</span>
+          <span class="cmp-leg cmp-leg-added">✅ Added</span>
+        </div>
+      </div>
       <div class="comparison-metrics" id="comparisonMetrics">
         <p style="color:#888">Run both schedules first.</p>
       </div>
@@ -258,20 +287,153 @@
       <div class="charts-grid">
         <div class="chart-card">
           <canvas id="chartCoverage"></canvas>
-          <p class="chart-label">Coverage by Day</p>
+          <p class="chart-label">Coverage by Day (Required vs Assigned)</p>
         </div>
         <div class="chart-card">
           <canvas id="chartWorkload"></canvas>
-          <p class="chart-label">Workload Distribution</p>
+          <p class="chart-label">Workload Distribution per Employee</p>
         </div>
         <div class="chart-card">
           <canvas id="chartFitness"></canvas>
-          <p class="chart-label">GA Fitness Evolution</p>
+          <p class="chart-label">GA Fitness Evolution (lower = better)</p>
         </div>
         <div class="chart-card">
           <canvas id="chartSkills"></canvas>
-          <p class="chart-label">Skill Coverage</p>
+          <p class="chart-label">Skill Coverage across Team</p>
         </div>
+        <div class="chart-card chart-card-wide">
+          <canvas id="chartBeforeAfter"></canvas>
+          <p class="chart-label">Before vs After Disruption — Coverage per Day</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- How It Works -->
+    <div class="tab-content" id="tab-howit">
+      <div class="howit-container">
+
+        <div class="howit-hero">
+          <h2>🧠 How the Optimization Works</h2>
+          <p>DynaShift AI uses a multi-objective constraint-satisfaction approach to build and repair workforce schedules in real time. It balances three competing goals simultaneously: maximum coverage, schedule stability, and fair workload distribution.</p>
+        </div>
+
+        <div class="howit-grid">
+
+          <div class="howit-card howit-hard">
+            <div class="howit-card-icon">🔒</div>
+            <h3>Hard Constraints</h3>
+            <p>These <strong>must never be violated</strong>. Any schedule that breaks a hard constraint is immediately penalised heavily in the fitness function.</p>
+            <ul>
+              <li>✅ <strong>Availability</strong> — employees are only assigned to shifts they are available for</li>
+              <li>✅ <strong>Skill match</strong> — shifts requiring specific skills only assign qualified employees</li>
+              <li>✅ <strong>Staffing demand</strong> — each shift slot must meet the minimum headcount</li>
+              <li>✅ <strong>Max consecutive days</strong> — no employee works more than N days in a row</li>
+              <li>✅ <strong>Max hours/week</strong> — weekly hours stay within the contract limit</li>
+            </ul>
+          </div>
+
+          <div class="howit-card howit-soft">
+            <div class="howit-card-icon">🎯</div>
+            <h3>Soft Objectives</h3>
+            <p>These are <strong>optimised but can be traded off</strong> against each other. They are weighted and summed into a single fitness score.</p>
+            <ul>
+              <li>⚖️ <strong>Fairness</strong> — minimise standard deviation of shifts per employee</li>
+              <li>🔄 <strong>Minimum change</strong> — after a disruption, change as few assignments as possible</li>
+              <li>📊 <strong>Workload balance</strong> — distribute shifts evenly across the team</li>
+              <li>📈 <strong>Coverage surplus</strong> — avoid over-staffing as well as under-staffing</li>
+            </ul>
+          </div>
+
+          <div class="howit-card howit-metric">
+            <div class="howit-card-icon">📐</div>
+            <h3>Minimum-Change Metric</h3>
+            <p>After a disruption the repair engine starts from a <strong>copy of the original schedule</strong> and only modifies what is necessary:</p>
+            <ol>
+              <li>Remove all assignments that are now <strong>invalid</strong> (employee absent / unavailable)</li>
+              <li>Fill <strong>under-covered</strong> slots by selecting the least-loaded available substitute</li>
+              <li>Trim <strong>over-covered</strong> slots by releasing the most-loaded employee</li>
+              <li>Repeat for up to 50 iterations until no improvement is possible</li>
+            </ol>
+            <p class="howit-formula">Change Cost = ∑ cells where revised[e][d] ≠ initial[e][d]</p>
+          </div>
+
+          <div class="howit-card howit-algo">
+            <div class="howit-card-icon">🔬</div>
+            <h3>Algorithms</h3>
+            <div class="algo-list">
+              <div class="algo-item">
+                <span class="algo-badge algo-ga">GA</span>
+                <div>
+                  <strong>Genetic Algorithm</strong> — population of 20 schedules evolved over up to 200 generations. Tournament selection, single-point crossover, random mutation. Seeded with a greedy solution for fast convergence.
+                </div>
+              </div>
+              <div class="algo-item">
+                <span class="algo-badge algo-sa">SA</span>
+                <div>
+                  <strong>Simulated Annealing</strong> — starts from a greedy solution, randomly perturbs one slot per step, accepts worse solutions with probability e^(−Δ/T). Temperature decays at α=0.995.
+                </div>
+              </div>
+              <div class="algo-item">
+                <span class="algo-badge algo-cp">CP</span>
+                <div>
+                  <strong>Constraint Propagation</strong> — builds per-employee domains, applies arc-consistency to enforce max-hours, assigns greedily using the MRV (Minimum Remaining Values) heuristic.
+                </div>
+              </div>
+              <div class="algo-item">
+                <span class="algo-badge algo-gr">GR</span>
+                <div>
+                  <strong>Greedy Heuristic</strong> — iterates days and shifts, always assigning the least-loaded available employee first. Fast O(n·d·s) baseline used to seed the other algorithms.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="howit-card howit-fitness">
+            <div class="howit-card-icon">🏋️</div>
+            <h3>Fitness Function</h3>
+            <p>Lower total score = better schedule. The three components are independently weighted via the sliders on the left panel.</p>
+            <div class="fitness-formula">
+              <div class="ff-row"><span class="ff-label">Total</span><span class="ff-eq">=</span><span class="ff-val">w<sub>cov</sub> × CoveragePenalty</span></div>
+              <div class="ff-row"><span class="ff-label"></span><span class="ff-eq">+</span><span class="ff-val">w<sub>fair</sub> × FairnessPenalty</span></div>
+              <div class="ff-row"><span class="ff-label"></span><span class="ff-eq">+</span><span class="ff-val">1.0 × ConstraintPenalty</span></div>
+            </div>
+            <table class="penalty-table">
+              <tr><th>Violation</th><th>Penalty</th></tr>
+              <tr><td>Under-coverage per slot</td><td>×10 per missing person</td></tr>
+              <tr><td>Over-coverage per slot</td><td>×2 per excess person</td></tr>
+              <tr><td>Availability violation</td><td>+15 per cell</td></tr>
+              <tr><td>Consecutive day breach</td><td>+8 per day over limit</td></tr>
+              <tr><td>Max hours breach</td><td>+12 per excess shift</td></tr>
+              <tr><td>Fairness (std dev)</td><td>stddev × 5</td></tr>
+            </table>
+          </div>
+
+          <div class="howit-card howit-disruptions">
+            <div class="howit-card-icon">💥</div>
+            <h3>Disruption Types</h3>
+            <div class="disruption-type-list">
+              <div class="dt-item"><span class="dt-icon">👤</span><div><strong>Employee Absence</strong> — marks 1–3 employees as inactive, zeroes their availability for the affected day. All their pre-assigned slots become conflicts.</div></div>
+              <div class="dt-item"><span class="dt-icon">📈</span><div><strong>Demand Surge</strong> — multiplies staffing demand on the affected day by 1.25×, 1.5×, or 2× (low/medium/high). Creates immediate under-coverage.</div></div>
+              <div class="dt-item"><span class="dt-icon">🩹</span><div><strong>Skill Loss / Injury</strong> — removes one skill from a randomly selected employee. Any shift that required that skill is now uncovered by that employee.</div></div>
+              <div class="dt-item"><span class="dt-icon">🔧</span><div><strong>Equipment Failure</strong> — blocks an entire shift slot on the affected day for all employees. Simulates a facility or equipment outage.</div></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="howit-step-guide">
+          <h3>🎯 Demo Flow for Judges</h3>
+          <div class="step-list">
+            <div class="step-item"><span class="step-num">1</span><div><strong>Generate Data</strong> — Click "🧬 Generate Synthetic Data" to create 12 employees with random skills and availability over 7 days.</div></div>
+            <div class="step-item"><span class="step-num">2</span><div><strong>Build Initial Schedule</strong> — Click "🤖 Run AI Scheduler" (Genetic Algorithm selected by default). Watch the fitness chart converge.</div></div>
+            <div class="step-item"><span class="step-num">3</span><div><strong>Inject a Disruption</strong> — Select an employee from the dropdown, choose "Employee Absence", click "🔥 Inject Disruption". Conflicts appear immediately.</div></div>
+            <div class="step-item"><span class="step-num">4</span><div><strong>Inject a Second Disruption</strong> — Change type to "Demand Surge", set severity to High, click "🔥 Inject Disruption" again.</div></div>
+            <div class="step-item"><span class="step-num">5</span><div><strong>Repair</strong> — Click "🔧 AI Repair Schedule". The revised schedule appears, showing only the minimum necessary changes (teal highlights).</div></div>
+            <div class="step-item"><span class="step-num">6</span><div><strong>Compare</strong> — Switch to the "📊 Comparison" tab to see BEFORE vs AFTER side by side with the change cost metric.</div></div>
+            <div class="step-item step-auto"><span class="step-num">⚡</span><div><strong>Auto Demo</strong> — Click "▶️ Auto Demo (Judge)" to run the entire flow automatically in 4 seconds.</div></div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -330,7 +492,10 @@
 <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
 <footer class="footer">
   <div>⚡ DynaShift AI &nbsp;|&nbsp; ANVATION 2026 &nbsp;|&nbsp; Constraint-based Multi-Objective Optimization</div>
-  <div>Powered by Genetic Algorithm · Simulated Annealing · Constraint Propagation</div>
+  <div>Genetic Algorithm · Simulated Annealing · Constraint Propagation · Greedy Heuristic</div>
+  <div style="margin-top:4px;font-size:0.68rem;opacity:0.6">
+    🌐 <a href="https://kgowripriya2006-art.github.io/dynamic-workforce-rescheduler" style="color:#4f8ef7;text-decoration:none">kgowripriya2006-art.github.io/dynamic-workforce-rescheduler</a>
+  </div>
 </footer>
 
 <script src="data.js"></script>

@@ -98,6 +98,7 @@ function generateData() {
   // Update UI
   renderEmployeeList();
   renderDemandTable();
+  populateEmployeeSelector();
   clearScheduleViews();
   clearConflicts();
   clearDisruptionLog();
@@ -107,6 +108,24 @@ function generateData() {
   addLog('info', `📊 Demand matrix ready. Max daily demand: ${maxDemand()}.`);
   updateMetrics();
 }
+
+/* ── Populate the judge-facing employee dropdown ── */
+function populateEmployeeSelector() {
+  const sel = document.getElementById('disruptionEmployee');
+  sel.innerHTML = '<option value="random">⚡ Random (Auto)</option>';
+  STATE.employees.forEach(emp => {
+    const opt = document.createElement('option');
+    opt.value = emp.id;
+    opt.textContent = `${emp.name} — ${emp.skills.join(', ')}`;
+    sel.appendChild(opt);
+  });
+}
+
+/* ── Show/hide employee selector based on disruption type ── */
+document.getElementById('disruptionType').addEventListener('change', function() {
+  const row = document.getElementById('empSelectorRow');
+  row.style.display = (this.value === 'absence' || this.value === 'skill_loss') ? 'flex' : 'none';
+});
 
 function maxDemand() {
   let m = 0;

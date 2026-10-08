@@ -27,6 +27,7 @@ function updateCharts() {
   updateWorkloadChart();
   updateFitnessChart();
   updateSkillsChart();
+  updateBeforeAfterChart();
 }
 
 /* ── Coverage by Day ── */
@@ -201,14 +202,89 @@ function updateSkillsChart() {
   });
 }
 
+/* ── Before vs After Disruption Coverage ── */
+let chartBeforeAfterInst = null;
+
+function updateBeforeAfterChart() {
+  if (!STATE.schedule) return;
+  const labels = Array.from({ length: STATE.numDays }, (_, i) => `Day ${i + 1}`);
+
+  const initialAssigned = labels.map((_, d) =>
+    STATE.employees.reduce((acc, e) => acc + (STATE.schedule[e.id][d] >= 0 ? 1 : 0), 0)
+  );
+  const revisedAssigned = STATE.revised
+    ? labels.map((_, d) =>
+        STATE.employees.reduce((acc, e) => acc + (STATE.revised[e.id][d] >= 0 ? 1 : 0), 0)
+      )
+    : null;
+  const required = labels.map((_, d) =>
+    STATE.demand[d].slice(0, STATE.numShifts).reduce((a, b) => a + b, 0)
+  );
+
+  const ctx = document.getElementById('chartBeforeAfter');
+  if (!ctx) return;
+  ctx.style.height = '180px';
+  if (chartBeforeAfterInst) chartBeforeAfterInst.destroy();
+
+  const datasets = [
+    {
+      label: 'Required',
+      data: required,
+      borderColor: '#e74c3c',
+      backgroundColor: 'rgba(231,76,60,0.1)',
+      borderWidth: 2,
+      borderDash: [5, 4],
+      pointRadius: 3,
+      fill: false,
+      tension: 0.3,
+      type: 'line'
+    },
+    {
+      label: 'Initial Schedule',
+      data: initialAssigned,
+      backgroundColor: 'rgba(79,142,247,0.6)',
+      borderColor: '#4f8ef7',
+      borderWidth: 1,
+      borderRadius: 4
+    }
+  ];
+
+  if (revisedAssigned) {
+    datasets.push({
+      label: 'After Repair',
+      data: revisedAssigned,
+      backgroundColor: 'rgba(46,204,113,0.6)',
+      borderColor: '#2ecc71',
+      borderWidth: 1,
+      borderRadius: 4
+    });
+  }
+
+  chartBeforeAfterInst = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      ...CHART_DEFAULTS,
+      plugins: {
+        legend: { labels: { color: '#9aa5be', font: { size: 11 } } }
+      }
+    }
+  });
+}
+
 /* ════════════════════════════════════════════════════
    AUTO-DEMO: Run a full demo on page load
 ════════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', () => {
   // Show a welcome hint in the AI log
   addLog('info', '👋 Welcome to DynaShift AI — ANVATION 2026');
-  addLog('info', '1️⃣ Click "Generate Synthetic Data"');
-  addLog('info', '2️⃣ Click "Run AI Scheduler"');
-  addLog('info', '3️⃣ Click "Inject Disruption" × 2');
-  addLog('info', '4️⃣ Click "AI Repair Schedule"');
+  addLog('info', '⚡ Click "▶️ Auto Demo (Judge)" for instant walkthrough');
+  addLog('info', '— or —');
+  addLog('info', '1️⃣ Generate Synthetic Data');
+  addLog('info', '2️⃣ Run AI Scheduler');
+  addLog('info', '3️⃣ Inject 2 Disruptions');
+  addLog('info', '4️⃣ AI Repair Schedule');
+
+  // Hide employee selector initially (only shown for absence/skill_loss)
+  document.getElementById('empSelectorRow').style.display = 'none';
 });
