@@ -99,6 +99,7 @@ function generateData() {
   renderEmployeeList();
   renderDemandTable();
   populateEmployeeSelector();
+  populateHandoverEmployeeSelector();
   clearScheduleViews();
   clearConflicts();
   clearDisruptionLog();

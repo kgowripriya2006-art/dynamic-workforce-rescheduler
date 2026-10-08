@@ -227,6 +227,7 @@
       <button class="tab" onclick="switchTab('comparison', this)">📊 Comparison</button>
       <button class="tab" onclick="switchTab('analytics', this)">📈 Analytics</button>
       <button class="tab" onclick="switchTab('howit', this)">🧠 How It Works</button>
+      <button class="tab tab-handover-btn" onclick="switchTab('handover', this)">🐙 Work Handover</button>
     </div>
 
     <!-- Initial Schedule -->
@@ -437,6 +438,172 @@
       </div>
     </div>
 
+    <!-- ═══ GitHub Work Handover Tab ═══ -->
+    <div class="tab-content" id="tab-handover">
+      <div class="handover-container">
+
+        <div class="handover-hero">
+          <div class="handover-hero-left">
+            <span class="handover-hero-icon">🐙</span>
+            <div>
+              <h2>GitHub Work Handover</h2>
+              <p>Fetch an absent employee's GitHub activity to understand unfinished work and identify who can continue it.</p>
+            </div>
+          </div>
+          <div class="handover-notice">
+            <span>🔓</span> Public repos only — no token required
+          </div>
+        </div>
+
+        <div class="handover-setup-grid">
+          <div class="card card-blue handover-setup-card">
+            <div class="card-header">
+              <span class="card-icon">⚙️</span>
+              <h2>Repository &amp; Employee</h2>
+            </div>
+            <div class="form-row">
+              <label>GitHub Repo URL</label>
+              <input type="url" id="ghRepoUrl" placeholder="https://github.com/owner/repo" class="gh-input"/>
+            </div>
+            <div class="form-row">
+              <label>Absent Employee</label>
+              <select id="ghEmployee" class="gh-input">
+                <option value="">— Generate data first —</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>GitHub Username</label>
+              <input type="text" id="ghUsername" placeholder="e.g. octocat" class="gh-input"/>
+            </div>
+            <button class="btn btn-blue" onclick="fetchGitHubWork()" id="btnFetchGH">
+              🔍 Fetch Work Information
+            </button>
+          </div>
+
+          <div class="handover-summary-row" id="ghSummaryRow">
+            <div class="handover-stat-card">
+              <div class="hsc-icon">📋</div>
+              <div class="hsc-val" id="ghStatIssuesVal">—</div>
+              <div class="hsc-label">Open Issues</div>
+            </div>
+            <div class="handover-stat-card">
+              <div class="hsc-icon">🔀</div>
+              <div class="hsc-val" id="ghStatPRsVal">—</div>
+              <div class="hsc-label">Open PRs</div>
+            </div>
+            <div class="handover-stat-card">
+              <div class="hsc-icon">💾</div>
+              <div class="hsc-val" id="ghStatCommitsVal">—</div>
+              <div class="hsc-label">Recent Commits</div>
+            </div>
+            <div class="handover-stat-card">
+              <div class="hsc-icon">✅</div>
+              <div class="hsc-val" id="ghStatClosedVal">—</div>
+              <div class="hsc-label">Closed Issues</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="ghLoader" class="handover-loader" style="display:none">
+          <div class="loader-spinner"></div>
+          <span id="ghLoaderMsg">Fetching from GitHub API…</span>
+        </div>
+
+        <div id="ghError" class="handover-error" style="display:none">
+          <span style="font-size:1.4rem">⚠️</span>
+          <div>
+            <strong id="ghErrorTitle">Error</strong>
+            <p id="ghErrorMsg" style="font-size:0.82rem;color:var(--text-dim);margin-top:4px"></p>
+          </div>
+        </div>
+
+        <div id="ghResults" style="display:none">
+          <div class="handover-data-grid">
+
+            <div class="card card-red2 handover-data-card">
+              <div class="card-header">
+                <span class="card-icon">📋</span>
+                <h2>Open Issues</h2>
+                <span class="handover-count-badge" id="ghOpenIssueCount">0</span>
+              </div>
+              <div class="handover-item-list" id="ghOpenIssueList">
+                <p class="handover-empty">No open issues found.</p>
+              </div>
+            </div>
+
+            <div class="card card-green handover-data-card">
+              <div class="card-header">
+                <span class="card-icon">✅</span>
+                <h2>Closed Issues</h2>
+                <span class="handover-count-badge handover-count-green" id="ghClosedIssueCount">0</span>
+              </div>
+              <div class="handover-item-list" id="ghClosedIssueList">
+                <p class="handover-empty">No closed issues found.</p>
+              </div>
+            </div>
+
+            <div class="card card-purple handover-data-card">
+              <div class="card-header">
+                <span class="card-icon">🔀</span>
+                <h2>Pull Requests</h2>
+                <span class="handover-count-badge handover-count-purple" id="ghPRCount">0</span>
+              </div>
+              <div class="handover-item-list" id="ghPRList">
+                <p class="handover-empty">No pull requests found.</p>
+              </div>
+            </div>
+
+            <div class="card card-teal handover-data-card">
+              <div class="card-header">
+                <span class="card-icon">💾</span>
+                <h2>Recent Commits</h2>
+                <span class="handover-count-badge handover-count-teal" id="ghCommitCount">0</span>
+              </div>
+              <div class="handover-item-list" id="ghCommitList">
+                <p class="handover-empty">No recent commits found.</p>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="handover-report-section">
+            <div class="handover-report-header">
+              <h3>📄 Handover Report</h3>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn btn-purple" style="width:auto;padding:8px 20px" onclick="generateHandoverReport()">
+                  📄 Generate Handover Report
+                </button>
+                <button class="btn btn-teal" style="width:auto;padding:8px 20px" onclick="generateReplacementRecommendations()">
+                  👥 Recommend Replacements
+                </button>
+              </div>
+            </div>
+            <div id="ghReport" class="handover-report-body" style="display:none"></div>
+            <div id="ghReplacements" class="handover-replacements" style="display:none"></div>
+            <div id="ghApprovalPanel" class="handover-approval" style="display:none">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+                <span style="font-size:1.3rem">✍️</span>
+                <h3 style="font-size:0.95rem;font-weight:700">Manager Approval</h3>
+              </div>
+              <p style="font-size:0.84rem;color:var(--text-dim);margin-bottom:12px">
+                Review the proposed replacement below. Approve to update the schedule, or reject to keep the current schedule unchanged.
+              </p>
+              <div id="ghApprovalDetails" style="margin-bottom:14px"></div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <button class="btn btn-teal" style="width:auto;padding:8px 24px" onclick="approveReassignment()">
+                  ✅ Approve &amp; Update Schedule
+                </button>
+                <button class="btn btn-red" style="width:auto;padding:8px 24px" onclick="rejectReassignment()">
+                  ❌ Reject — Keep Original
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- end tab-handover -->
+
   </section>
 
   <!-- RIGHT PANEL: Data + Conflicts -->
@@ -502,5 +669,6 @@
 <script src="scheduler.js"></script>
 <script src="ui.js"></script>
 <script src="analytics.js"></script>
+<script src="handover.js"></script>
 </body>
 </html>
