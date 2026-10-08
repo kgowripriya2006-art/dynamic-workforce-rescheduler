@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="DynaShift AI — ML-powered dynamic workforce rescheduling under disruption. ANVATION 2026 Hackathon project featuring Genetic Algorithm, Simulated Annealing, and Constraint Propagation."/>
+  <meta property="og:title" content="⚡ DynaShift AI — Dynamic Workforce Rescheduling"/>
+  <meta property="og:description" content="ML-powered workforce rescheduling with Genetic Algorithm, Simulated Annealing, and Constraint Propagation. ANVATION 2026."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://kgowripriya2006-art.github.io/dynamic-workforce-rescheduler"/>
+  <meta name="theme-color" content="#1a1a2e"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='32' font-size='32'>⚡</text></svg>"/>
+  <title>⚡ DynaShift AI — Dynamic Workforce Rescheduling</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ═══════════════════════ HEADER ═══════════════════════ -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-icon">⚡</span>
+      <div>
+        <h1>DynaShift <span class="ai-badge">AI</span></h1>
+        <p class="tagline">Dynamic Workforce Rescheduling Under Disruption</p>
+      </div>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-anvation">ANVATION 2026</span>
+      <span class="badge badge-ml">ML-Powered</span>
+      <span class="badge badge-live">LIVE</span>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════ METRICS ROW ═══════════════════════ -->
+<section class="metrics-row" id="metricsRow">
+  <div class="metric-card gradient-blue">
+    <div class="metric-icon">👥</div>
+    <div class="metric-val" id="mEmployees">0</div>
+    <div class="metric-label">Employees</div>
+  </div>
+  <div class="metric-card gradient-purple">
+    <div class="metric-icon">📅</div>
+    <div class="metric-val" id="mShifts">0</div>
+    <div class="metric-label">Shifts Assigned</div>
+  </div>
+  <div class="metric-card gradient-green">
+    <div class="metric-icon">✅</div>
+    <div class="metric-val" id="mCoverage">0%</div>
+    <div class="metric-label">Coverage</div>
+  </div>
+  <div class="metric-card gradient-orange">
+    <div class="metric-icon">⚖️</div>
+    <div class="metric-val" id="mFairness">0.00</div>
+    <div class="metric-label">Fairness Score</div>
+  </div>
+  <div class="metric-card gradient-red">
+    <div class="metric-icon">🔥</div>
+    <div class="metric-val" id="mConflicts">0</div>
+    <div class="metric-label">Conflicts</div>
+  </div>
+  <div class="metric-card gradient-teal">
+    <div class="metric-icon">🔄</div>
+    <div class="metric-val" id="mChangeCost">0</div>
+    <div class="metric-label">Change Cost</div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ MAIN LAYOUT ═══════════════════════ -->
+<main class="main-layout">
+
+  <!-- LEFT PANEL: Controls -->
+  <aside class="panel panel-left">
+
+    <!-- Data Generation -->
+    <div class="card card-blue">
+      <div class="card-header">
+        <span class="card-icon">🧬</span>
+        <h2>Synthetic Data Engine</h2>
+      </div>
+      <div class="form-row">
+        <label>Employees</label>
+        <input type="number" id="numEmployees" value="12" min="4" max="30"/>
+      </div>
+      <div class="form-row">
+        <label>Days</label>
+        <input type="number" id="numDays" value="7" min="3" max="14"/>
+      </div>
+      <div class="form-row">
+        <label>Shifts/Day</label>
+        <input type="number" id="numShifts" value="3" min="1" max="4"/>
+      </div>
+      <button class="btn btn-blue" onclick="generateData()">
+        🧬 Generate Synthetic Data
+      </button>
+    </div>
+
+    <!-- AI Scheduling -->
+    <div class="card card-purple">
+      <div class="card-header">
+        <span class="card-icon">🤖</span>
+        <h2>AI Scheduler</h2>
+      </div>
+      <div class="form-row">
+        <label>Algorithm</label>
+        <select id="algorithm">
+          <option value="greedy">Greedy Heuristic</option>
+          <option value="genetic" selected>Genetic Algorithm (ML)</option>
+          <option value="simulated">Simulated Annealing</option>
+          <option value="constraint">Constraint Propagation</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Generations (GA)</label>
+        <input type="number" id="generations" value="100" min="10" max="500"/>
+      </div>
+      <div class="form-row">
+        <label>Fairness Weight</label>
+        <input type="range" id="fairnessWeight" min="0" max="1" step="0.1" value="0.5"/>
+        <span id="fairnessWeightVal">0.5</span>
+      </div>
+      <div class="form-row">
+        <label>Coverage Weight</label>
+        <input type="range" id="coverageWeight" min="0" max="1" step="0.1" value="0.8"/>
+        <span id="coverageWeightVal">0.8</span>
+      </div>
+      <button class="btn btn-purple" onclick="runScheduler()">
+        🤖 Run AI Scheduler
+      </button>
+    </div>
+
+    <!-- Disruptions -->
+    <div class="card card-red">
+      <div class="card-header">
+        <span class="card-icon">🔥</span>
+        <h2>Inject Disruption</h2>
+      </div>
+      <div class="form-row">
+        <label>Type</label>
+        <select id="disruptionType">
+          <option value="absence">Employee Absence</option>
+          <option value="surge">Demand Surge</option>
+          <option value="skill_loss">Skill Loss / Injury</option>
+          <option value="equipment">Equipment Failure</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Day</label>
+        <input type="number" id="disruptionDay" value="3" min="1" max="14"/>
+      </div>
+      <div class="form-row">
+        <label>Severity</label>
+        <select id="disruptionSeverity">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+      <button class="btn btn-red" onclick="injectDisruption()">
+        🔥 Inject Disruption
+      </button>
+      <button class="btn btn-orange" onclick="repairSchedule()">
+        🔧 AI Repair Schedule
+      </button>
+    </div>
+
+    <!-- Live Constraint Editor -->
+    <div class="card card-teal">
+      <div class="card-header">
+        <span class="card-icon">⚙️</span>
+        <h2>Live Constraint Editor</h2>
+        <span class="live-dot"></span>
+      </div>
+      <div class="form-row">
+        <label>Max Hours/Week</label>
+        <input type="number" id="maxHours" value="40" min="20" max="60"/>
+      </div>
+      <div class="form-row">
+        <label>Min Rest Hours</label>
+        <input type="number" id="minRest" value="8" min="4" max="16"/>
+      </div>
+      <div class="form-row">
+        <label>Max Consecutive Days</label>
+        <input type="number" id="maxConsecutive" value="5" min="2" max="7"/>
+      </div>
+      <div class="form-row">
+        <label>Require Skill Match</label>
+        <input type="checkbox" id="requireSkillMatch" checked/>
+      </div>
+      <button class="btn btn-teal" onclick="applyConstraints()">
+        ⚙️ Apply & Re-Optimize
+      </button>
+    </div>
+
+  </aside>
+
+  <!-- CENTER: Schedule Grid + Charts -->
+  <section class="panel panel-center">
+
+    <!-- Schedule Tabs -->
+    <div class="tab-bar">
+      <button class="tab active" onclick="switchTab('initial', this)">📋 Initial Schedule</button>
+      <button class="tab" onclick="switchTab('revised', this)">🔄 Revised Schedule</button>
+      <button class="tab" onclick="switchTab('comparison', this)">📊 Comparison</button>
+      <button class="tab" onclick="switchTab('analytics', this)">📈 Analytics</button>
+    </div>
+
+    <!-- Initial Schedule -->
+    <div class="tab-content active" id="tab-initial">
+      <div class="schedule-header">
+        <h3>📋 Initial AI-Generated Schedule</h3>
+        <div class="legend">
+          <span class="leg leg-morning">Morning</span>
+          <span class="leg leg-afternoon">Afternoon</span>
+          <span class="leg leg-night">Night</span>
+          <span class="leg leg-off">Off</span>
+          <span class="leg leg-conflict">Conflict</span>
+        </div>
+      </div>
+      <div class="schedule-wrap" id="initialScheduleWrap">
+        <div class="empty-state">
+          <div class="empty-icon">🤖</div>
+          <p>Generate data and run the AI Scheduler to see your schedule.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Revised Schedule -->
+    <div class="tab-content" id="tab-revised">
+      <div class="schedule-header">
+        <h3>🔄 Revised Schedule After Disruption</h3>
+        <div class="disruption-log" id="disruptionLog">
+          <p style="color:#888">No disruptions yet.</p>
+        </div>
+      </div>
+      <div class="schedule-wrap" id="revisedScheduleWrap">
+        <div class="empty-state">
+          <div class="empty-icon">🔥</div>
+          <p>Inject a disruption and run AI Repair to see the revised schedule.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison -->
+    <div class="tab-content" id="tab-comparison">
+      <h3>📊 Schedule Comparison — Changes Highlighted</h3>
+      <div class="comparison-metrics" id="comparisonMetrics">
+        <p style="color:#888">Run both schedules first.</p>
+      </div>
+      <div class="schedule-wrap" id="comparisonWrap"></div>
+    </div>
+
+    <!-- Analytics -->
+    <div class="tab-content" id="tab-analytics">
+      <h3>📈 AI Analytics Dashboard</h3>
+      <div class="charts-grid">
+        <div class="chart-card">
+          <canvas id="chartCoverage"></canvas>
+          <p class="chart-label">Coverage by Day</p>
+        </div>
+        <div class="chart-card">
+          <canvas id="chartWorkload"></canvas>
+          <p class="chart-label">Workload Distribution</p>
+        </div>
+        <div class="chart-card">
+          <canvas id="chartFitness"></canvas>
+          <p class="chart-label">GA Fitness Evolution</p>
+        </div>
+        <div class="chart-card">
+          <canvas id="chartSkills"></canvas>
+          <p class="chart-label">Skill Coverage</p>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- RIGHT PANEL: Data + Conflicts -->
+  <aside class="panel panel-right">
+
+    <!-- Employees -->
+    <div class="card card-green">
+      <div class="card-header">
+        <span class="card-icon">👥</span>
+        <h2>Employee Pool</h2>
+      </div>
+      <div class="employee-list" id="employeeList">
+        <p style="color:#888;text-align:center">Generate data to populate.</p>
+      </div>
+    </div>
+
+    <!-- Demand -->
+    <div class="card card-orange">
+      <div class="card-header">
+        <span class="card-icon">📊</span>
+        <h2>Demand Matrix</h2>
+      </div>
+      <div class="demand-table-wrap" id="demandTable">
+        <p style="color:#888;text-align:center">Generate data to populate.</p>
+      </div>
+    </div>
+
+    <!-- Conflicts -->
+    <div class="card card-red2">
+      <div class="card-header">
+        <span class="card-icon">⚠️</span>
+        <h2>Unresolved Conflicts</h2>
+      </div>
+      <div class="conflict-list" id="conflictList">
+        <p style="color:#888;text-align:center">No conflicts found.</p>
+      </div>
+    </div>
+
+    <!-- AI Log -->
+    <div class="card card-dark">
+      <div class="card-header">
+        <span class="card-icon">🧠</span>
+        <h2>AI Decision Log</h2>
+      </div>
+      <div class="ai-log" id="aiLog">
+        <p style="color:#888">Waiting for AI activity...</p>
+      </div>
+    </div>
+
+  </aside>
+</main>
+
+<!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+<footer class="footer">
+  <div>⚡ DynaShift AI &nbsp;|&nbsp; ANVATION 2026 &nbsp;|&nbsp; Constraint-based Multi-Objective Optimization</div>
+  <div>Powered by Genetic Algorithm · Simulated Annealing · Constraint Propagation</div>
+</footer>
+
+<script src="data.js"></script>
+<script src="scheduler.js"></script>
+<script src="ui.js"></script>
+<script src="analytics.js"></script>
+</body>
+</html>
